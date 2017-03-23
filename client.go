@@ -1,49 +1,48 @@
-package ghostcli
+package ghost
 
 import (
 	"encoding/json"
 	"net/http"
 	"net/url"
 
-	"github.com/Bo0mer/ghost"
 	"github.com/pkg/errors"
 )
 
 func EnableMonitor(url, name string) error {
-	return (&Ghost{
+	return (&ghost{
 		url:  url,
 		http: http.DefaultClient,
 	}).EnableMonitor(name)
 }
 
 func DisableMonitor(url, name string) error {
-	return (&Ghost{
+	return (&ghost{
 		url:  url,
 		http: http.DefaultClient,
 	}).DisableMonitor(name)
 }
 
 func Monitors(url string) (map[string]bool, error) {
-	return (&Ghost{
+	return (&ghost{
 		url:  url,
 		http: http.DefaultClient,
 	}).Monitors()
 }
 
-type Ghost struct {
+type ghost struct {
 	url  string
 	http *http.Client
 }
 
-func (g *Ghost) EnableMonitor(name string) error {
-	return g.action(ghost.ActionEnable, name)
+func (g *ghost) EnableMonitor(name string) error {
+	return g.action(ActionEnable, name)
 }
 
-func (g *Ghost) DisableMonitor(name string) error {
-	return g.action(ghost.ActionDisable, name)
+func (g *ghost) DisableMonitor(name string) error {
+	return g.action(ActionDisable, name)
 }
 
-func (g *Ghost) Monitors() (map[string]bool, error) {
+func (g *ghost) Monitors() (map[string]bool, error) {
 	resp, err := g.http.Get(g.url)
 	if err != nil {
 		return nil, errors.Wrap(err, "error doing monitors requst")
@@ -61,7 +60,7 @@ func (g *Ghost) Monitors() (map[string]bool, error) {
 	return monitors, nil
 }
 
-func (g *Ghost) action(action ghost.Action, name string) error {
+func (g *ghost) action(action Action, name string) error {
 	var vals url.Values = make(map[string][]string)
 	vals.Set("action", string(action))
 	vals.Set("name", name)

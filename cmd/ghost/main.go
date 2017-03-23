@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Bo0mer/ghost/ghostcli"
+	"github.com/Bo0mer/ghost"
 )
 
 var (
@@ -65,7 +65,7 @@ func monitor() error {
 		return errors.New("monitor: missing target")
 	}
 
-	return ghostcli.EnableMonitor(remote, target)
+	return ghost.EnableMonitor(remote, target)
 }
 func unmonitor() error {
 	target := flag.Arg(1)
@@ -73,10 +73,10 @@ func unmonitor() error {
 		return errors.New("monitor: missing target")
 	}
 
-	return ghostcli.DisableMonitor(remote, target)
+	return ghost.DisableMonitor(remote, target)
 }
 func targets() error {
-	monitors, err := ghostcli.Monitors(remote)
+	monitors, err := ghost.Monitors(remote)
 	if err != nil {
 		return err
 	}

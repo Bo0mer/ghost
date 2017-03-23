@@ -24,12 +24,14 @@ type Monitor interface {
 type Action string
 
 var (
-	ActionEnable  Action = "enable"
+	// ActionEnable implies enabling a monitor.
+	ActionEnable Action = "enable"
+	// ActionDisable implies disabling a monitor.
 	ActionDisable Action = "disable"
 )
 
-var initOnce sync.Once
-var mu sync.Mutex // guards
+var initOnce sync.Once // gaurds monitors map initialization
+var mu sync.Mutex      // guards
 var monitors map[string]Monitor
 
 // RegisterMonitor registers m with the set of available monitors.
