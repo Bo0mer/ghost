@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// EnableMonitor enables a remote monitor 'name' located at url.
 func EnableMonitor(url, name string) error {
 	return (&ghost{
 		url:  url,
@@ -15,6 +16,7 @@ func EnableMonitor(url, name string) error {
 	}).EnableMonitor(name)
 }
 
+// DisableMonitor disables a remote monitor 'name' located at url.
 func DisableMonitor(url, name string) error {
 	return (&ghost{
 		url:  url,
@@ -22,7 +24,8 @@ func DisableMonitor(url, name string) error {
 	}).DisableMonitor(name)
 }
 
-func Monitors(url string) (map[string]bool, error) {
+// Monitors returns all registered monitors and their respective states.
+func Monitors(url string) (map[string]MonitorState, error) {
 	return (&ghost{
 		url:  url,
 		http: http.DefaultClient,
@@ -42,7 +45,7 @@ func (g *ghost) DisableMonitor(name string) error {
 	return g.action(ActionDisable, name)
 }
 
-func (g *ghost) Monitors() (map[string]bool, error) {
+func (g *ghost) Monitors() (map[string]MonitorState, error) {
 	resp, err := g.http.Get(g.url)
 	if err != nil {
 		return nil, errors.Wrap(err, "error doing monitors requst")
@@ -53,7 +56,7 @@ func (g *ghost) Monitors() (map[string]bool, error) {
 		return nil, errors.Errorf("unexpected response status code %d", resp.StatusCode)
 	}
 
-	monitors := make(map[string]bool)
+	monitors := make(map[string]MonitorState)
 	if err := json.NewDecoder(resp.Body).Decode(&monitors); err != nil {
 		return nil, errors.Wrap(err, "error decoding monitors response body")
 	}

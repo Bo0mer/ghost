@@ -1,5 +1,3 @@
-// Package ghost provides functionality for exposing application monitoring
-// switches via HTTP handler.
 package ghost
 
 import (
@@ -30,6 +28,16 @@ var (
 	ActionDisable Action = "disable"
 )
 
+// MonitorState describes state of a monitor.
+type MonitorState bool
+
+var (
+	// MonitorStateEnabled implies that a monitor is enabled.
+	MonitorStateEnabled = true
+	// MonitorStateDisabled implies that a monitor is disabled.
+	MonitorStateDisabled = false
+)
+
 var initOnce sync.Once // gaurds monitors map initialization
 var mu sync.Mutex      // guards
 var monitors map[string]Monitor
@@ -44,6 +52,29 @@ func RegisterMonitor(m Monitor) {
 	defer mu.Unlock()
 	monitors[m.Name()] = m
 }
+
+// MonitorFuncs is an adaptor func to allow use of ordinary functions as
+// a Monitor.
+func MonitorFuncs(name string, enable, disable func(), state func() bool) Monitor {
+	return &funcMonitor{
+		name:    name,
+		enable:  enable,
+		disable: disable,
+		state:   state,
+	}
+}
+
+type funcMonitor struct {
+	name    string
+	enable  func()
+	disable func()
+	state   func() bool
+}
+
+func (m *funcMonitor) Enable()       { m.enable() }
+func (m *funcMonitor) Disable()      { m.disable() }
+func (m *funcMonitor) Enabled() bool { return m.state() }
+func (m *funcMonitor) Name() string  { return m.name }
 
 // MonitorHandler returns http.Handler that handles (un)monitor requests.
 func MonitorHandler() http.Handler {
@@ -63,7 +94,12 @@ func listMonitors(w http.ResponseWriter, req *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if err := json.NewEncoder(w).Encode(&monitors); err != nil {
+	mons := make(map[string]bool, len(monitors))
+	for name, monitor := range monitors {
+		mons[name] = monitor.Enabled()
+	}
+
+	if err := json.NewEncoder(w).Encode(&mons); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

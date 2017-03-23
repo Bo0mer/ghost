@@ -23,8 +23,7 @@ const usage = `Usage: ghost is a tool to enable/disable monitoring targets.
 Commands:
 	monitor		Activate monitoring of a target.
 	unmonitor	Deactivate monitoring of a target.
-	status		Display target status.
-	targets		List available monitoring targets.
+	targets		List available monitoring targets and their status.
 
 Flags:
 	-g		Specify remote ghost address.`
@@ -81,14 +80,14 @@ func targets() error {
 		return err
 	}
 	var status string
+	fmt.Println("Name\t\tStatus")
 	for monitor, enabled := range monitors {
 		status = "disabled"
 		if enabled {
 			status = "enabled"
 		}
 
-		// TODO(borshukov): Print monitor state.
-		fmt.Printf("%v\t%v\n", monitor, status)
+		fmt.Printf("%v\t\t%v\n", monitor, status)
 	}
 	return nil
 }
