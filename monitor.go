@@ -53,7 +53,7 @@ func RegisterMonitor(m Monitor) {
 	monitors[m.Name()] = m
 }
 
-// MonitorFuncs is an adaptor func to allow use of ordinary functions as
+// MonitorFuncs is an adapter func to allow use of ordinary functions as
 // a Monitor.
 func MonitorFuncs(name string, enable, disable func(), state func() bool) Monitor {
 	return &funcMonitor{
